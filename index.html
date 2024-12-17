@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot Frontend</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    #messages {
+      margin-bottom: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    input {
+      padding: 5px;
+      margin-right: 10px;
+    }
+    button {
+      padding: 5px 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Chatbot Frontend</h1>
+  <div id="messages"></div>
+  <input type="text" id="input" placeholder="Escribe tu mensaje">
+  <button id="send">Enviar</button>
+
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script>
+    // Conectar al backend en localhost si es local
+    const socket = io("http://localhost:3000"); // Cambia a "http://<IP-PUBLICA-EC2>:3000" si usas AWS EC2
+
+    const messagesDiv = document.getElementById("messages");
+    const input = document.getElementById("input");
+    const sendButton = document.getElementById("send");
+
+    // Enviar mensaje al backend cuando se hace clic en el botón
+    sendButton.addEventListener("click", () => {
+      const message = input.value;
+      if (message.trim()) {
+        socket.emit("message", message);  // Emite el mensaje al servidor
+        addMessage(`Tú: ${message}`); // Muestra el mensaje en la interfaz
+        input.value = "";  // Limpia el campo de entrada
+      }
+    });
+
+    // Recibir respuesta del backend y mostrarla en la interfaz
+    socket.on("response", (response) => {
+      addMessage(`Bot: ${response}`); // Muestra la respuesta del backend
+    });
+
+    // Mostrar mensajes en la página
+    function addMessage(message) {
+      const messageElement = document.createElement("p");
+      messageElement.textContent = message;
+      messagesDiv.appendChild(messageElement);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;  // Desplazar hacia abajo para ver el mensaje más reciente
+    }
+  </script>
+</body>
+</html>
